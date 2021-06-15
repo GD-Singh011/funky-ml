@@ -1,12 +1,28 @@
 def do_everything(data, hues,features,labels,test_size = 0.2,random_state =42):
 
-    import plotly.express as px
-    import numpy as np
-    import seaborn as sns
-    import matplotlib.pyplot as plt
-    import warnings
-    import pandas_profiling as pp
+    from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier
+    from sklearn.linear_model import LogisticRegression, SGDClassifier
+    from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+    from sklearn.linear_model import PassiveAggressiveClassifier
+    from sklearn.model_selection import train_test_split
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.compose import ColumnTransformer
+    from sklearn.metrics import accuracy_score
+    from sklearn.naive_bayes import GaussianNB
+    from imblearn.over_sampling import SMOTE
+    from lightgbm import LGBMClassifier
     from collections import Counter
+    import matplotlib.pyplot as plt
+    import pandas_profiling as pp
+    from sklearn.svm import SVC
+    import plotly.express as px
+    import seaborn as sns
+    import pandas as pd
+    import numpy as np
+    import warnings
+
     warnings.simplefilter(action='ignore', category=Warning)
     
     print("Printing First 5 Rows : \n\n")
