@@ -88,7 +88,7 @@ def do_everything(data, hues,features,labels,test_size = 0.2,random_state =42, t
             plt.show()
             print("\n\n\n\n")
             sns.pairplot(data,hue = hues, palette='Greens')
-        plt.show()
+            plt.show()
     
         correlation_pairplots(data)
     visualization(hues,data,features,labels)
@@ -186,6 +186,7 @@ def do_everything(data, hues,features,labels,test_size = 0.2,random_state =42, t
     'loss': ['hinge', 'log'],
     'alpha':np.logspace(-4, 4, 20),
     }]
+    
     models =[("LR", LogisticRegression(), parameters_lin),("SVC", SVC(),parameters_svm),('KNN',KNeighborsClassifier(),parameters_knn),
     ("DTC", DecisionTreeClassifier(),parameters_dt),("GNB", GaussianNB(), param_nb),("SGDC", SGDClassifier(), paramters_sgdc),('RF',RandomForestClassifier(),parameters_rfc),
     ('ADA',AdaBoostClassifier(),parameters_ada),('XGB',GradientBoostingClassifier(),parameters_xgb),('LGBN', LGBMClassifier(),parameters_lgbm),
@@ -197,21 +198,22 @@ def do_everything(data, hues,features,labels,test_size = 0.2,random_state =42, t
     accres = []
 
     for name,model, param in models:
-        
+        print('Training {} and Showing Predictions ['.format(str(model)),u'\u2713','] \n')
         model.fit(x_train, y_train)
+        
         model_results = model.predict(x_test)
         accuracy = accuracy_score(y_test, model_results)
         print('Validation Accuracy is :',accuracy)
+        
         print('Applying K-Fold Cross validation on Model {}[*]'.format(name))
         accuracies = cross_val_score(estimator=model, X=x_train, y=y_train, cv=cv_folds, scoring='accuracy')
         print("Accuracy: {:.2f} %".format(accuracies.mean()*100))
         acc = accuracies.mean()*100
-        print("Standard Deviation: {:.2f} %".format(accuracies.std()*100)) 
+        print("Standard Deviation: {:.2f} %\n".format(accuracies.std()*100)) 
         results.append(acc)
         names.append(name)
-        accres.append((name,acc))
         if tune == 'y' and not name == 'GNB':
-            print('Applying Grid Search Cross validation for model {} []\n'.format(name))
+            print('Grid Search Cross validation for model {} []\n'.format(name))
             cv_params = param
             grid_search = GridSearchCV(
             estimator=model,
@@ -219,19 +221,26 @@ def do_everything(data, hues,features,labels,test_size = 0.2,random_state =42, t
             scoring='accuracy',
             cv=cv_folds,
             n_jobs=-1,
-            verbose=4,
-                )
+            verbose=4,)
             grid_search.fit(X_train, y_train)
             best_accuracy = grid_search.best_score_
             best_parameters = grid_search.best_params_
             print("Best Accuracy for model {}: {:.2f} %".format(name,best_accuracy*100))
             print("Best Parameters: for model {}".format(name), best_parameters)
-            print('Applying Grid Search Cross validation Done[',u'\u2713',']\n')
-            
-        print('Training Compeleted Showing Predictions [',u'\u2713','] \n')
+            print('Grid Search Cross validation Done[',u'\u2713',']\n')
+            print('Training {} Done ['.format(str(model)),u'\u2713','] \n')  
+            print('########################################################################\n')
+            accres.append((name,acc, best_parameters))
+        elif not tune=='y':
+            print('Training {} Done ['.format(str(model)),u'\u2713','] \n')  
+            print('########################################################################')
+            accres.append((name,acc))  
     accres.sort(key=lambda k:k[1],reverse=True)
     print("\n The Accuracy of the Models Are:\n ")
-    tab = pd.DataFrame(accres)
+    if tune=='y':
+        tab = pd.DataFrame(accres, columns= ['Model','Accuracy', 'Best Params'])
+    elif not tune=='y':
+        tab = pd.DataFrame(accres, columns= ['Model','Accuracy'])
     print(tab)
-    sns.barplot(x=tab[1], y=tab[0], palette='mako');
-    print("\n\nModel With Highest Accuracy is: \n",accres[0],'\n\n')
+    sns.barplot(x=tab['Model'], y=tab['Accuracy'], palette='mako');
+    print("\n\nModel With Highest Accuracy is: ",accres[0][0],' with an Accuracy of ',tab.iloc[0,1],'% \n\n')
