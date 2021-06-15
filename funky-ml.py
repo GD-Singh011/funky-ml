@@ -1,11 +1,13 @@
-def do_everything(data, hues,features,labels,test_size = 0.2,random_state =42):
+def do_everything(data, hues,features,labels,test_size = 0.2,random_state =42, tune = 'n',cv_folds = 5):
 
+    from sklearn.model_selection import GridSearchCV,StratifiedKFold
     from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier
     from sklearn.linear_model import LogisticRegression, SGDClassifier
     from sklearn.preprocessing import LabelEncoder, OneHotEncoder
     from sklearn.linear_model import PassiveAggressiveClassifier
     from sklearn.model_selection import train_test_split
     from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.model_selection import cross_val_score
     from sklearn.preprocessing import StandardScaler
     from sklearn.tree import DecisionTreeClassifier
     from sklearn.compose import ColumnTransformer
@@ -85,7 +87,7 @@ def do_everything(data, hues,features,labels,test_size = 0.2,random_state =42):
             sns.heatmap(data.corr(),annot = True, cmap = 'Blues')
             plt.show()
             print("\n\n\n\n")
-                sns.pairplot(data,hue = hues, palette='Greens')
+            sns.pairplot(data,hue = hues, palette='Greens')
         plt.show()
     
         correlation_pairplots(data)
@@ -135,25 +137,98 @@ def do_everything(data, hues,features,labels,test_size = 0.2,random_state =42):
     
     print('Training All Basic Classifiers on Training Set [*] \n')
     
+    parameters_svm= [
+    {'kernel': ['rbf'], 'gamma': [0.1, 0.5, 0.9, 1],
+        'C': np.logspace(-4, 4, 5)},
+    ]
+    parameters_lin = [{
+    'penalty': ['l1', 'l2', ],
+    'solver': ['newton-cg', 'liblinear', ],
+    'C': np.logspace(-4, 4, 5),
+    }]
+    parameters_knn = [{
+    'n_neighbors': list(range(0, 11)),
+    'weights': ['uniform', 'distance'],
+    'algorithm': ['auto', 'kd_tree', 'brute'],
+    }]
+    parameters_dt = [{
+    'criterion': ['gini', 'entropy'],
+    'splitter': ['best', 'random'],
+    'max_depth': [4,  6,  8,  10,  12,  20,  40, 70],
 
-    models =[("LR", LogisticRegression()),("SVC", SVC()),('KNN',KNeighborsClassifier()),
-    ("DTC", DecisionTreeClassifier()),("GNB", GaussianNB()),("SGDC", SGDClassifier()),('RF',RandomForestClassifier()),
-    ('ADA',AdaBoostClassifier()),('XGB',GradientBoostingClassifier()),('LGBN', LGBMClassifier()),
-    ('PAC',PassiveAggressiveClassifier())]
+    }]
+    parameters_rfc = [{
+    'criterion': ['gini', 'entropy'],
+    'n_estimators': [100, 300, 500, 750, 1000],
+    'max_features': [2, 3],
+    }]
+    parameters_xgb = [{
+    'max_depth': [4,  6,  8,  10],
+    'learning_rate': [0.3, 0.1],
+    }]
+    parameters_lgbm =  {
+    'learning_rate': [0.005, 0.01],
+    'n_estimators': [8,16,24],
+    'boosting_type' : ['gbdt', 'dart'],
+    'objective' : ['binary'],
+    }
+    paramters_pac = {
+        'C': np.logspace(-4, 4, 20)},
+    
+    
+    param_nb={}
+    parameters_ada={
+            'learning_rate': [0.005, 0.01],
+            'n_estimators': [8,16,24],
+    }
+    paramters_sgdc = [{
+    'penalty': ['l2', 'l1', 'elasticnet'],
+    'loss': ['hinge', 'log'],
+    'alpha':np.logspace(-4, 4, 20),
+    }]
+    models =[("LR", LogisticRegression(), parameters_lin),("SVC", SVC(),parameters_svm),('KNN',KNeighborsClassifier(),parameters_knn),
+    ("DTC", DecisionTreeClassifier(),parameters_dt),("GNB", GaussianNB(), param_nb),("SGDC", SGDClassifier(), paramters_sgdc),('RF',RandomForestClassifier(),parameters_rfc),
+    ('ADA',AdaBoostClassifier(),parameters_ada),('XGB',GradientBoostingClassifier(),parameters_xgb),('LGBN', LGBMClassifier(),parameters_lgbm),
+    ('PAC',PassiveAggressiveClassifier(),paramters_pac)]
 
     results = []
     names = []
     finalResults = []
     accres = []
 
-    for name,model in models:
+    for name,model, param in models:
+        
         model.fit(x_train, y_train)
         model_results = model.predict(x_test)
-        acc = accuracy_score(y_test, model_results)
+        accuracy = accuracy_score(y_test, model_results)
+        print('Validation Accuracy is :',accuracy)
+        print('Applying K-Fold Cross validation on Model {}[*]'.format(name))
+        accuracies = cross_val_score(estimator=model, X=x_train, y=y_train, cv=cv_folds, scoring='accuracy')
+        print("Accuracy: {:.2f} %".format(accuracies.mean()*100))
+        acc = accuracies.mean()*100
+        print("Standard Deviation: {:.2f} %".format(accuracies.std()*100)) 
         results.append(acc)
         names.append(name)
         accres.append((name,acc))
-    print('Training Compeleted Showing Predictions [',u'\u2713','] \n')
+        if tune == 'y' and not name == 'GNB':
+            print('Applying Grid Search Cross validation for model {} []\n'.format(name))
+            cv_params = param
+            grid_search = GridSearchCV(
+            estimator=model,
+            param_grid=cv_params,
+            scoring='accuracy',
+            cv=cv_folds,
+            n_jobs=-1,
+            verbose=4,
+                )
+            grid_search.fit(X_train, y_train)
+            best_accuracy = grid_search.best_score_
+            best_parameters = grid_search.best_params_
+            print("Best Accuracy for model {}: {:.2f} %".format(name,best_accuracy*100))
+            print("Best Parameters: for model {}".format(name), best_parameters)
+            print('Applying Grid Search Cross validation Done[',u'\u2713',']\n')
+            
+        print('Training Compeleted Showing Predictions [',u'\u2713','] \n')
     accres.sort(key=lambda k:k[1],reverse=True)
     print("\n The Accuracy of the Models Are:\n ")
     tab = pd.DataFrame(accres)
