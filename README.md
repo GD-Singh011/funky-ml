@@ -44,12 +44,12 @@ Funky-ML takes data, hues , features, labels as input and performs everything ri
                 Percentage for test set split. Default = 0.2
             random_state : int
             tune : str
-                Whether to enable hypertuning or not. Default = 'n
+                Whether to enable hypertuning or not. Default = 'n'
             cv_folds : int
                 No. of CV Folds. Default 5
                 
          Example:
-              from funkyml.funky import funkify
+              from funkyml.Funky import funkify
               dataset = pd.read_csv('XYZ.csv')
               features = pd.iloc[:, :-1]
               lables = pd.iloc[:, -1]
