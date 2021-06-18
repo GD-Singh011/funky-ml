@@ -16,7 +16,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='Gagandeep Singh',
-    author_email="", #Add this and remove comment
+    author_email="gdswasir@gmail.com", 
     url="https://github.com/GD-Singh011/funky-ml",
     keywords=['funkyml', 'AutoML', 'Python'],
     install_requires=[
