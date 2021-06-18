@@ -1,4 +1,4 @@
-Class Funky:
+class Funky:
     def funkify(data, hues,features,labels,test_size = 0.2,random_state =42, tune = 'n',cv_folds = 5):
         """
         This Function takes data, hues , features, labels as input and performs everything right from Visualisation to Prediction using 11 Models.
