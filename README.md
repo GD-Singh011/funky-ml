@@ -8,7 +8,6 @@ Funky-ML takes data, hues , features, labels as input and performs everything ri
             2) Box Plots
             3) Distribution Plots
             4) Correlation and Pairplots
-            5) 
         Preprocessing
             1) SMOTE 
             2) Label Encoding and One-Hot Encoding of categorical data.
@@ -51,7 +50,7 @@ Funky-ML takes data, hues , features, labels as input and performs everything ri
          Example:
               from funkyml.Funky import funkify
               dataset = pd.read_csv('XYZ.csv')
-              features = pd.iloc[:, :-1]
-              lables = pd.iloc[:, -1]
+              features = dataset.iloc[:, :-1]
+              lables = dataset.iloc[:, -1]
               funkify(dataset , 'hue' , features, labels)
               
