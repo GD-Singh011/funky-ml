@@ -1,5 +1,6 @@
 class Models:
-    def classify(data, hues,features,labels,smote = True,test_size = 0.2,random_state =42, tune = 'n',cv_folds = 5):
+
+    def classify(data,features,labels,smote = True,sparse = True,test_size = 0.2,random_state =42, tune = 'n',cv_folds = 5):
         """
         Here Smote is deault True but if you dont want to apply smote on dataset then turn it off smote = False
         This Function takes data, hues , features, labels as input and performs everything right from Visualisation to Prediction using 11 Models.
@@ -58,14 +59,12 @@ class Models:
         from imblearn.over_sampling import SMOTE
         from lightgbm import LGBMClassifier
         from collections import Counter
-        import matplotlib.pyplot as plt
-        import pandas_profiling as pp
         from sklearn.svm import SVC
-        import plotly.express as px
         import seaborn as sns
         import pandas as pd
         import numpy as np
         import warnings
+        import scipy
 
         warnings.simplefilter(action='ignore', category=Warning)
 
@@ -96,10 +95,29 @@ class Models:
             features,labels=sm.fit_resample(features,labels)
             print('SMOTE Done [',u'\u2713',']\n')
 
+        ## Sparse Matrix ---------------------------------------------------------------------
+        if sparse==True:
+            if scipy.sparse.issparse(features[()]):
+                print('Converting Sparse Features to array []\n')
+                features = features[()].toarray()
+                print(
+                            'Conversion of Sparse Features to array Done [', u'\u2713', ']\n')
+
+            elif scipy.sparse.issparse(labels[()]):
+                print('Converting Sparse Labels to array []\n')
+                labels = labels[()].toarray()
+                print(
+                            'Conversion of Sparse Labels to array Done [', u'\u2713', ']\n')
+
+            else:
+                print("No, sparce matrix found....")
+
         ## Splitting ---------------------------------------------------------------------
+
         print('Splitting Data into Train and Validation Sets [*]\n')
 
-        x_train, x_test, y_train, y_test = train_test_split(features, labels, test_size= test_size, random_state= random_state)
+        x_train, x_test, y_train, y_test = train_test_split(features, labels, test_size = test_size, random_state = random_state)
+
         print('Splitting Done [',u'\u2713',']\n')
 
         ## Scaling ---------------------------------------------------------------------
