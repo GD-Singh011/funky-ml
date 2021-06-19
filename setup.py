@@ -9,8 +9,8 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name='funky-ml',
-    packages=['funkyml', 'funkyml.funky'],
-    version='0.0.1',
+    packages=['funkyml'],
+    version='0.1.2',
     license='MIT',
     description="Automated ML by GD-Singh",
     long_description=long_description,
