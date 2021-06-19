@@ -1,4 +1,5 @@
 class Funky:
+#########################################################################################################################   
     def __sparseCheck(features, labels): 
         # Took from https://github.com/d4rk-lucif3r/LuciferML/blob/master/luciferml/supervised/utils/sparseCheck.py
     features = features
@@ -27,6 +28,7 @@ class Funky:
         # print('Sparse matrix Check failed with KeyError: ', error)
         pass
     return (features, labels)
+#########################################################################################################################
 
     def funkify(data, hues,features,labels,test_size = 0.2,random_state =42, tune = 'n',cv_folds = 5):
         """
@@ -194,7 +196,7 @@ class Funky:
         else:
             print('Features and labels are not categorical [',u'\u2713',']\n')
         ##SparseCheck----------------------------------------------------------------
-        features, labels = sparseCheck(self.features, self.labels)
+        features, labels = Funky.__sparseCheck(features, labels)
         ## SMOTE ---------------------------------------------------------------------
         print('Applying SMOTE [*]\n')
 
