@@ -1,4 +1,33 @@
 class Funky:
+    def __sparseCheck(features, labels): 
+        # Took from https://github.com/d4rk-lucif3r/LuciferML/blob/master/luciferml/supervised/utils/sparseCheck.py
+    features = features
+    labels = labels
+    """
+    Takes features and labels as input and checks if any of those is sparse csr_matrix.
+    """
+    try:
+        print('Checking for Sparse Matrix [*]\n')
+        if scipy.sparse.issparse(features[()]):
+            print('Converting Sparse Features to array []\n')
+            features = features[()].toarray()
+            print(
+                'Conversion of Sparse Features to array Done [', u'\u2713', ']\n')
+
+        elif scipy.sparse.issparse(labels[()]):
+            print('Converting Sparse Labels to array []\n')
+            labels = labels[()].toarray()
+            print(
+                'Conversion of Sparse Labels to array Done [', u'\u2713', ']\n')
+
+        else:
+            print('No Sparse Matrix Found')
+
+    except Exception as error:
+        # print('Sparse matrix Check failed with KeyError: ', error)
+        pass
+    return (features, labels)
+
     def funkify(data, hues,features,labels,test_size = 0.2,random_state =42, tune = 'n',cv_folds = 5):
         """
         This Function takes data, hues , features, labels as input and performs everything right from Visualisation to Prediction using 11 Models.
@@ -76,7 +105,8 @@ class Funky:
         import warnings
 
         warnings.simplefilter(action='ignore', category=Warning)
-
+        
+        
         print("Printing First 5 Rows : \n\n")
         print(data.head())
         print("\n\n Getting the Data Types: \n\n")
@@ -163,7 +193,8 @@ class Funky:
             print('Encoding Labels Done [',u'\u2713',']\n')
         else:
             print('Features and labels are not categorical [',u'\u2713',']\n')
-
+        ##SparseCheck----------------------------------------------------------------
+        features, labels = sparseCheck(self.features, self.labels)
         ## SMOTE ---------------------------------------------------------------------
         print('Applying SMOTE [*]\n')
 
